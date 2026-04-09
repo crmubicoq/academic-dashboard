@@ -2149,6 +2149,40 @@
             <button id="resetAllBtn">🗑 전체 초기화</button>
         </div>
 
+        <!-- 이번 주 진행 업무 -->
+        <div class="card summary-section">
+            <div class="card-header">
+                <h2 class="card-title">이번 주 진행 업무<span class="week-range" id="weekRangeLabel"></span></h2>
+                <p class="card-description">다가오는 중요한 일정을 확인하세요</p>
+            </div>
+
+            <div class="summary-grid">
+                <!-- 시험 일정 -->
+                <div class="summary-card exam">
+                    <div class="summary-card-title">예정된 평가</div>
+                    <div class="summary-list" id="examSummary">
+                        <div class="empty-state">등록된 학사 일정이 없습니다</div>
+                    </div>
+                </div>
+
+                <!-- 공지 업무 -->
+                <div class="summary-card notice">
+                    <div class="summary-card-title">공지 업무</div>
+                    <div class="summary-list" id="noticeSummary">
+                        <div class="empty-state">예정된 공지가 없습니다</div>
+                    </div>
+                </div>
+
+                <!-- 시험지 생성 -->
+                <div class="summary-card paper">
+                    <div class="summary-card-title">시험지 생성</div>
+                    <div class="summary-list" id="paperSummary">
+                        <div class="empty-state">생성할 시험지가 없습니다</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 벤토 그리드 레이아웃 -->
         <div class="bento-grid">
             <!-- 왼쪽: 입력 폼 -->
@@ -2350,39 +2384,6 @@
             </div>
         </div>
 
-        <!-- 하단: 오늘의 주요 할 일 -->
-        <div class="card summary-section">
-            <div class="card-header">
-                <h2 class="card-title">이번 주 진행 업무<span class="week-range" id="weekRangeLabel"></span></h2>
-                <p class="card-description">다가오는 중요한 일정을 확인하세요</p>
-            </div>
-
-            <div class="summary-grid">
-                <!-- 시험 일정 -->
-                <div class="summary-card exam">
-                    <div class="summary-card-title">예정된 평가</div>
-                    <div class="summary-list" id="examSummary">
-                        <div class="empty-state">등록된 학사 일정이 없습니다</div>
-                    </div>
-                </div>
-
-                <!-- 공지 업무 -->
-                <div class="summary-card notice">
-                    <div class="summary-card-title">공지 업무</div>
-                    <div class="summary-list" id="noticeSummary">
-                        <div class="empty-state">예정된 공지가 없습니다</div>
-                    </div>
-                </div>
-
-                <!-- 시험지 생성 -->
-                <div class="summary-card paper">
-                    <div class="summary-card-title">시험지 생성</div>
-                    <div class="summary-list" id="paperSummary">
-                        <div class="empty-state">생성할 시험지가 없습니다</div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div><!-- end .container -->
 
     <!-- ============================================
@@ -2550,9 +2551,9 @@ v2.8 개발 실록 (최종 검증 완료)
             };
             
             events.forEach(exam => {
-                if (exam.is_completed) return;
-                
-                if (exam.noticeDate && exam.noticeDate <= today) {
+                const ct = exam.completedTypes || {};
+
+                if (exam.noticeDate && exam.noticeDate <= today && !ct.notice) {
                     const task = {
                         name: exam.noticeName || exam.name + ' 공지',
                         date: exam.noticeDate
@@ -2563,8 +2564,8 @@ v2.8 개발 실록 (최종 검증 완료)
                         tasks.overdueNotice.push(task);
                     }
                 }
-                
-                if (exam.paperDate && exam.paperDate <= today) {
+
+                if (exam.paperDate && exam.paperDate <= today && !ct.creation) {
                     const task = {
                         name: exam.paperName || exam.name + ' 시험지',
                         date: exam.paperDate
@@ -2970,19 +2971,31 @@ v2.8 개발 실록 (최종 검증 완료)
 
                 if (error) throw error;
 
-                events = (data || []).map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    examDate: item.exam_date,
-                    noticeDate: item.notice_date,
-                    paperDate: item.paper_date,
-                    type: item.type || 'exam',
-                    category: item.category || 'exam',
-                    noticeName: item.notice_name,
-                    paperName: item.paper_name,
-                    typeLabel: item.type_label || '평가',
-                    is_completed: item.is_completed || false
-                }));
+                events = (data || []).map(item => {
+                    // special_notes에 저장된 per-type 완료 상태 복원
+                    const sn = item.special_notes || {};
+                    const savedCompletedTypes = sn._completedTypes || null;
+                    const completedTypes = savedCompletedTypes || {
+                        main: item.is_completed || false,
+                        notice: false,
+                        creation: false
+                    };
+                    return {
+                        id: item.id,
+                        name: item.name,
+                        examDate: item.exam_date,
+                        noticeDate: item.notice_date,
+                        paperDate: item.paper_date,
+                        type: item.type || 'exam',
+                        category: item.category || 'exam',
+                        noticeName: item.notice_name,
+                        paperName: item.paper_name,
+                        typeLabel: item.type_label || '평가',
+                        is_completed: item.is_completed || false,
+                        completedTypes: completedTypes,
+                        special_notes: sn
+                    };
+                });
 
                 renderCalendar();
                 renderSummary();
@@ -3092,6 +3105,12 @@ v2.8 개발 실록 (최종 검증 완료)
             if (stored) {
                 try {
                     events = JSON.parse(stored);
+                    // 기존 데이터 마이그레이션: completedTypes 없는 경우 초기화
+                    events.forEach(e => {
+                        if (!e.completedTypes) {
+                            e.completedTypes = { main: e.is_completed || false, notice: false, creation: false };
+                        }
+                    });
                 } catch (e) {
                     console.error('localStorage 파싱 오류:', e);
                     events = [];
@@ -3780,36 +3799,38 @@ v2.8 개발 실록 (최종 검증 완료)
             events.forEach((exam, index) => {
                 const examId = exam.id || `exam_${index}`; // 고유 ID 생성
                 
+                const ct = exam.completedTypes || {};
+
                 if (exam.examDate === dateString) {
-                    result.push({ 
-                        type: exam.type || 'exam', 
+                    result.push({
+                        type: exam.type || 'exam',
                         name: exam.name,
                         category: exam.category || categorizeEvent(exam.name, exam.type),
                         examId: examId,
                         eventType: 'main',
-                        is_completed: exam.is_completed || false,
+                        is_completed: ct.main || false,
                         special_note: (exam.special_notes && exam.special_notes.main) || ''
                     });
                 }
                 if (exam.noticeDate && exam.noticeDate === dateString) {
-                    result.push({ 
-                        type: 'notice', 
+                    result.push({
+                        type: 'notice',
                         name: exam.noticeName || `${exam.name} 공지`,
                         category: 'notice',
                         examId: examId,
                         eventType: 'notice',
-                        is_completed: exam.is_completed || false,
+                        is_completed: ct.notice || false,
                         special_note: (exam.special_notes && exam.special_notes.notice) || ''
                     });
                 }
                 if (exam.paperDate && exam.paperDate === dateString) {
-                    result.push({ 
-                        type: 'creation', 
+                    result.push({
+                        type: 'creation',
                         name: exam.paperName || `${exam.name} 시험지`,
                         category: 'creation',
                         examId: examId,
                         eventType: 'creation',
-                        is_completed: exam.is_completed || false,
+                        is_completed: ct.creation || false,
                         special_note: (exam.special_notes && exam.special_notes.creation) || ''
                     });
                 }
@@ -3955,7 +3976,7 @@ v2.8 개발 실록 (최종 검증 완료)
                 : upcomingExams.map(event => {
                     const date = new Date(event.examDate);
                     const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
-                    const completedClass = event.is_completed ? 'completed' : '';
+                    const completedClass = (event.completedTypes && event.completedTypes.main) ? 'completed' : '';
                     return `
                         <div class="summary-item ${completedClass}">
                             <span class="summary-item-name">${event.name}</span>
@@ -3970,7 +3991,7 @@ v2.8 개발 실록 (최종 검증 완료)
                 : upcomingNotices.map(event => {
                     const date = new Date(event.noticeDate);
                     const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
-                    const completedClass = event.is_completed ? 'completed' : '';
+                    const completedClass = (event.completedTypes && event.completedTypes.notice) ? 'completed' : '';
                     return `
                         <div class="summary-item ${completedClass}">
                             <span class="summary-item-name">${event.noticeName || event.name + ' 공지'}</span>
@@ -3985,7 +4006,7 @@ v2.8 개발 실록 (최종 검증 완료)
                 : upcomingPapers.map(event => {
                     const date = new Date(event.paperDate);
                     const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
-                    const completedClass = event.is_completed ? 'completed' : '';
+                    const completedClass = (event.completedTypes && event.completedTypes.creation) ? 'completed' : '';
                     return `
                         <div class="summary-item ${completedClass}">
                             <span class="summary-item-name">${event.paperName || event.name + ' 시험지'}</span>
@@ -4259,6 +4280,7 @@ v2.8 개발 실록 (최종 검증 완료)
                     type: item.type,
                     category: item.category,
                     is_completed: false,
+                    completedTypes: { main: false, notice: false, creation: false },
                     special_notes: {}  // 빈 객체로 초기화
                 });
             });
@@ -4490,6 +4512,7 @@ v2.8 개발 실록 (최종 검증 완료)
                     type: 'exam',
                     category: autoCategory,  // 자동 인식 (midterm, final 등)
                     is_completed: false,
+                    completedTypes: { main: false, notice: false, creation: false },
                     special_notes: {}
                 };
                 
@@ -4516,6 +4539,7 @@ v2.8 개발 실록 (최종 검증 완료)
                     type: 'general',
                     category: autoCategory,  // 자동 인식 (quiz, discussion 등)
                     is_completed: false,
+                    completedTypes: { main: false, notice: false, creation: false },
                     special_notes: {}
                 };
                 
@@ -4786,8 +4810,9 @@ v2.8 개발 실록 (최종 검증 완료)
             const title = event.name || event.noticeName || event.paperName || '제목없음';
             const category = event.category || 'notice';
             const categoryName = categoryNames[category] || category;
-            const isCompleted = event.is_completed || false;
-            
+            const ct = event.completedTypes || {};
+            const isCompleted = ct[eventType] || false;
+
             // eventType별 특이사항 로드
             const specialNote = (event.special_notes && event.special_notes[eventType]) || '';
             
@@ -4803,8 +4828,8 @@ v2.8 개발 실록 (최종 검증 완료)
                     </div>
                     
                     <div class="schedule-item ${isCompleted ? 'completed' : ''}" style="border: none; padding: 0;">
-                        <button class="schedule-complete-btn ${isCompleted ? 'completed' : ''}" 
-                                onclick="toggleComplete('${strId}')"
+                        <button class="schedule-complete-btn ${isCompleted ? 'completed' : ''}"
+                                onclick="toggleComplete('${strId}', '${eventType}')"
                                 title="${isCompleted ? '완료 취소' : '완료 처리'}">
                             ${isCompleted ? '✓ 완료' : '완료'}
                         </button>
@@ -4831,11 +4856,12 @@ v2.8 개발 실록 (최종 검증 완료)
             document.body.appendChild(modal);
         }
 
-        function toggleComplete(id) {
+        function toggleComplete(id, eventType = 'main') {
             const strId = String(id);
             const e = events.find(x => String(x.id) === strId);
             if (e) {
-                e.is_completed = !e.is_completed;
+                if (!e.completedTypes) e.completedTypes = { main: false, notice: false, creation: false };
+                e.completedTypes[eventType] = !e.completedTypes[eventType];
                 saveToLocalStorage();
                 renderCalendar();
                 renderSummary();  // 주요 일정 갱신
