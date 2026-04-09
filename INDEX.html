@@ -2653,20 +2653,7 @@ v2.8 개발 실록 (최종 검증 완료)
                 }
             }
             
-            const msg = `📢 [업무보고]
-
-오늘 처리할 업무는 ${todayTotal}건입니다.
-(미처리된 과거 업무 ${overdueTotal}건 별도)
-
-▶ 오늘:
-  공지 ${tasks.todayNotice.length}건
-  시험지 ${tasks.todayPaper.length}건
-
-▶ 미처리:
-  공지 ${tasks.overdueNotice.length}건
-  시험지 ${tasks.overduePaper.length}건`;
-            
-            alert(msg);
+            console.log(`📢 [업무보고] 오늘 ${todayTotal}건 / 미처리 ${overdueTotal}건`);
         }
         
         function checkScheduledAlarm() {
