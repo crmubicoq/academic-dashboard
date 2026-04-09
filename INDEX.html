@@ -51,7 +51,8 @@
             --color-study-q: #6366F1;       /* 학습질문 - 인디고 */
             --color-study-n: #D97706;       /* 학습노트 - 황금색 */
             --color-grade: #BE185D;         /* 성적공개 - 진한 핑크 */
-            
+            --color-encourage: #EA580C;     /* 미응시자 독려 - 딥 오렌지 */
+
             /* 12개 카테고리 전용 색상표 - 연한 배경 (12% 투명도) */
             --color-notice-light: rgba(245, 158, 11, 0.12);
             --color-creation-light: rgba(16, 185, 129, 0.12);
@@ -769,6 +770,7 @@
         .filter-btn[data-filter="study_n"]    { color: #F59E0B;    border: 1.5px solid #F59E0B; }
         .filter-btn[data-filter="grade"]      { color: #8B5CF6;    border: 1.5px solid #8B5CF6; }
         .filter-btn[data-filter="etc"]        { color: #0D9488;    border: 1.5px solid #0D9488; }
+        .filter-btn[data-filter="encourage"]  { color: #EA580C;    border: 1.5px solid #EA580C; }
 
         /* ── hover: 카테고리색 연한 배경 강조 ── */
         .filter-btn[data-filter="all"]:not(.active):hover        { background: #F3F4F6; }
@@ -785,6 +787,7 @@
         .filter-btn[data-filter="study_n"]:not(.active):hover     { background: #FEF3C7; }
         .filter-btn[data-filter="grade"]:not(.active):hover     { background: #FCE7F3; }
         .filter-btn[data-filter="etc"]:not(.active):hover       { background: #CCFBF1; }
+        .filter-btn[data-filter="encourage"]:not(.active):hover  { background: #FFEDD5; }
 
         /* ── active: 배경 가득 채움 + 텍스트 흰색 ── */
         .filter-btn.active { color: #FFFFFF !important; font-weight: 600; }
@@ -802,6 +805,7 @@
         .filter-btn[data-filter="study_n"].active    { background: #D97706;    border-color: #D97706; }
         .filter-btn[data-filter="grade"].active      { background: #8B5CF6;    border-color: #8B5CF6; }
         .filter-btn[data-filter="etc"].active        { background: #0D9488;    border-color: #0D9488; }
+        .filter-btn[data-filter="encourage"].active  { background: #EA580C;    border-color: #EA580C; }
 
         /* 캘린더 스타일 */
         .calendar-header {
@@ -1113,6 +1117,12 @@
             color: #0EA5E9;
         }
 
+        .event-badge.encourage {
+            background: rgba(234, 88, 12, 0.12);
+            color: #EA580C;
+            border-left: 3px solid #EA580C;
+        }
+
         .event-badge.etc {
             background: var(--color-teal-light);
             color: var(--color-teal);
@@ -1133,7 +1143,7 @@
 
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
             margin-top: 16px;
         }
@@ -1155,6 +1165,10 @@
 
         .summary-card.paper {
             border-left-color: var(--color-green);
+        }
+
+        .summary-card.encourage {
+            border-left-color: #EA580C;
         }
 
         .summary-card-title {
@@ -1385,11 +1399,13 @@
             border-radius: 5px;
             white-space: nowrap;
         }
-        .modal-table .tag-exam   { background: var(--color-blue-light);   color: var(--color-blue); }
-        .modal-table .tag-notice { background: var(--color-orange-light); color: var(--color-orange); }
-        .modal-table .tag-paper  { background: var(--color-green-light);  color: var(--color-green); }
-        .modal-table .tag-quiz   { background: var(--color-purple-light);color: var(--color-purple); }
-        .modal-table .tag-etc    { background: var(--color-teal-light);  color: var(--color-teal); }
+        .modal-table .tag-exam     { background: var(--color-blue-light);   color: var(--color-blue); }
+        .modal-table .tag-notice   { background: var(--color-orange-light); color: var(--color-orange); }
+        .modal-table .tag-paper    { background: var(--color-green-light);  color: var(--color-green); }
+        .modal-table .tag-creation { background: var(--color-green-light);  color: var(--color-green); }
+        .modal-table .tag-quiz     { background: var(--color-purple-light); color: var(--color-purple); }
+        .modal-table .tag-encourage { background: rgba(234,88,12,0.12);    color: #EA580C; }
+        .modal-table .tag-etc      { background: var(--color-teal-light);   color: var(--color-teal); }
 
         /* 그룹 구분행 (기수별) */
         .modal-table .group-row td {
@@ -2180,6 +2196,14 @@
                         <div class="empty-state">생성할 시험지가 없습니다</div>
                     </div>
                 </div>
+
+                <!-- 미응시자 독려 -->
+                <div class="summary-card encourage">
+                    <div class="summary-card-title">미응시자 독려</div>
+                    <div class="summary-list" id="encourageSummary">
+                        <div class="empty-state">이번 주 독려 업무가 없습니다</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -2226,7 +2250,7 @@
                                 <span style="font-weight: 500;">이 일정은 평가(시험) 일정입니다</span>
                             </label>
                             <div style="font-size: 12px; color: #6B7280; margin-top: 8px; margin-left: 26px; line-height: 1.6;">
-                                <div style="margin-bottom: 4px;">✓ <strong>체크 시:</strong> 공지 업무(D-14), 시험지 생성(D-2) 자동 생성</div>
+                                <div style="margin-bottom: 4px;">✓ <strong>체크 시:</strong> 공지 업무(D-14), 시험지 생성(D-2) 자동 생성 / 중간·기말고사는 미응시자 독려(D+4) 추가 생성</div>
                                 <div>✗ <strong>미체크 시:</strong> 입력한 날짜에만 배지 생성 (카테고리 자동 인식)</div>
                             </div>
                         </div>
@@ -2253,6 +2277,10 @@
                             <div class="legend-item">
                                 <div class="legend-dot green"></div>
                                 <span>시험지 생성 (D-2)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:#EA580C;"></div>
+                                <span>미응시자 독려 (D+4, 중간·기말)</span>
                             </div>
                             <div class="legend-item">
                                 <div class="legend-dot teal"></div>
@@ -2360,6 +2388,7 @@
                     <button class="filter-btn" data-filter="study_q">학습질문</button>
                     <button class="filter-btn" data-filter="study_n">학습노트</button>
                     <button class="filter-btn" data-filter="grade">성적공개</button>
+                    <button class="filter-btn" data-filter="encourage">미응시자독려</button>
                     <button class="filter-btn" data-filter="etc">기타</button>
                 </div>
 
@@ -2547,9 +2576,11 @@ v2.8 개발 실록 (최종 검증 완료)
                 todayNotice: [],
                 overdueNotice: [],
                 todayPaper: [],
-                overduePaper: []
+                overduePaper: [],
+                todayEncourage: [],
+                overdueEncourage: []
             };
-            
+
             events.forEach(exam => {
                 const ct = exam.completedTypes || {};
 
@@ -2562,6 +2593,18 @@ v2.8 개발 실록 (최종 검증 완료)
                         tasks.todayNotice.push(task);
                     } else {
                         tasks.overdueNotice.push(task);
+                    }
+                }
+
+                if (exam.encourageDate && exam.encourageDate <= today && !ct.encourage) {
+                    const task = {
+                        name: exam.encourageName || exam.name + ' 미응시자 독려',
+                        date: exam.encourageDate
+                    };
+                    if (exam.encourageDate === today) {
+                        tasks.todayEncourage.push(task);
+                    } else {
+                        tasks.overdueEncourage.push(task);
                     }
                 }
 
@@ -2978,18 +3021,28 @@ v2.8 개발 실록 (최종 검증 완료)
                     const completedTypes = savedCompletedTypes || {
                         main: item.is_completed || false,
                         notice: false,
-                        creation: false
+                        creation: false,
+                        encourage: false
                     };
+                    // encourageDate: DB 컬럼 없으면 exam_date+4일로 자동 계산
+                    const examDateStr = item.exam_date;
+                    let encourageDate = item.encourage_date || null;
+                    const cat = item.category || '';
+                    if (!encourageDate && examDateStr && ['midterm', 'final'].includes(cat)) {
+                        encourageDate = calculateDates(examDateStr).encourageDate;
+                    }
                     return {
                         id: item.id,
                         name: item.name,
-                        examDate: item.exam_date,
+                        examDate: examDateStr,
                         noticeDate: item.notice_date,
                         paperDate: item.paper_date,
+                        encourageDate: encourageDate,
                         type: item.type || 'exam',
-                        category: item.category || 'exam',
+                        category: cat,
                         noticeName: item.notice_name,
                         paperName: item.paper_name,
+                        encourageName: item.encourage_name || (encourageDate ? `${item.name} 미응시자 독려` : null),
                         typeLabel: item.type_label || '평가',
                         is_completed: item.is_completed || false,
                         completedTypes: completedTypes,
@@ -3108,7 +3161,15 @@ v2.8 개발 실록 (최종 검증 완료)
                     // 기존 데이터 마이그레이션: completedTypes 없는 경우 초기화
                     events.forEach(e => {
                         if (!e.completedTypes) {
-                            e.completedTypes = { main: e.is_completed || false, notice: false, creation: false };
+                            e.completedTypes = { main: e.is_completed || false, notice: false, creation: false, encourage: false };
+                        } else if (e.completedTypes.encourage === undefined) {
+                            e.completedTypes.encourage = false;
+                        }
+                        // encourageDate 없으면 자동 계산
+                        if (!e.encourageDate && e.examDate && ['midterm', 'final'].includes(e.category)) {
+                            const d = calculateDates(e.examDate);
+                            e.encourageDate = d.encourageDate;
+                            e.encourageName = e.encourageName || `${e.name} 미응시자 독려`;
                         }
                     });
                 } catch (e) {
@@ -3218,10 +3279,13 @@ v2.8 개발 실록 (최종 검증 완료)
             noticeDate.setDate(noticeDate.getDate() - 14);
             const paperDate = new Date(exam);
             paperDate.setDate(paperDate.getDate() - 2);
-            
+            const encourageDate = new Date(exam);
+            encourageDate.setDate(encourageDate.getDate() + 4);
+
             return {
                 examDate: formatDate(exam),
                 noticeDate: formatDate(noticeDate),
+                encourageDate: formatDate(encourageDate),
                 paperDate: formatDate(paperDate)
             };
         }
@@ -3609,13 +3673,15 @@ v2.8 개발 실록 (최종 검증 완료)
                             category: category
                         };
                         
-                        // 중간/기말 시험인 경우에만 공지일, 시험지 생성일 자동 추가
+                        // 중간/기말 시험인 경우에만 공지일, 시험지 생성일, 독려일 자동 추가
                         if (itemTypeStr.includes('중간') || itemTypeStr.includes('기말')) {
                             const dates = calculateDates(dateStr);
                             item.noticeDate = dates.noticeDate;
                             item.paperDate = dates.paperDate;
+                            item.encourageDate = dates.encourageDate;
                             item.noticeName = `${eventName} 공지올리기`;
                             item.paperName = `${eventName} 시험지 생성`;
+                            item.encourageName = `${eventName} 미응시자 독려`;
                         }
                         
                         parsedData.push(item);
@@ -3670,14 +3736,17 @@ v2.8 개발 실록 (최종 검증 완료)
                 
                 const dates = calculateDates(date);
                 const category = categorizeEvent(name);
-                
+                const needsEncourage = ['midterm', 'final'].includes(category);
+
                 parsedData.push({
                     name: name,
                     examDate: dates.examDate,
                     noticeDate: dates.noticeDate,
                     paperDate: dates.paperDate,
+                    encourageDate: needsEncourage ? dates.encourageDate : null,
                     noticeName: `${name} 공지`,
                     paperName: `${name} 시험지`,
+                    encourageName: needsEncourage ? `${name} 미응시자 독려` : null,
                     type: 'exam',
                     typeLabel: '시험',
                     category: category
@@ -3834,6 +3903,17 @@ v2.8 개발 실록 (최종 검증 완료)
                         special_note: (exam.special_notes && exam.special_notes.creation) || ''
                     });
                 }
+                if (exam.encourageDate && exam.encourageDate === dateString) {
+                    result.push({
+                        type: 'encourage',
+                        name: exam.encourageName || `${exam.name} 미응시자 독려`,
+                        category: 'encourage',
+                        examId: examId,
+                        eventType: 'encourage',
+                        is_completed: ct.encourage || false,
+                        special_note: (exam.special_notes && exam.special_notes.encourage) || ''
+                    });
+                }
             });
             
             return result;
@@ -3957,21 +4037,31 @@ v2.8 개발 실록 (최종 검증 완료)
             // 시험지 생성 (eventType: 'creation') - paperDate 기준
             const upcomingPapers = events
                 .filter(event => {
-                    // paperDate가 이번 주에 속하는 일정만
                     if (!event.paperDate) return false;
                     const result = isInThisWeek(event.paperDate);
                     if (result) console.log('✅ 시험지 생성 (creation):', event.paperName || event.name, event.paperDate);
                     return result;
                 })
                 .sort((a, b) => (a.paperDate || '').localeCompare(b.paperDate || ''));
-            
+
+            // 미응시자 독려 (eventType: 'encourage') - encourageDate 기준
+            const upcomingEncourages = events
+                .filter(event => {
+                    if (!event.encourageDate) return false;
+                    const result = isInThisWeek(event.encourageDate);
+                    if (result) console.log('✅ 미응시자 독려 (encourage):', event.encourageName || event.name, event.encourageDate);
+                    return result;
+                })
+                .sort((a, b) => (a.encourageDate || '').localeCompare(b.encourageDate || ''));
+
             console.log('📝 이번 주 평가 (main):', upcomingExams.length, '개');
             console.log('📢 이번 주 공지 업무 (notice):', upcomingNotices.length, '개');
             console.log('📄 이번 주 시험지 생성 (creation):', upcomingPapers.length, '개');
-            
+            console.log('📣 이번 주 미응시자 독려 (encourage):', upcomingEncourages.length, '개');
+
             // 3. HTML 출력
             // 평가(시험) 카드
-            examSummary.innerHTML = upcomingExams.length === 0 
+            examSummary.innerHTML = upcomingExams.length === 0
                 ? '<div class="empty-state">이번 주 평가 업무가 없습니다</div>'
                 : upcomingExams.map(event => {
                     const date = new Date(event.examDate);
@@ -3984,7 +4074,7 @@ v2.8 개발 실록 (최종 검증 완료)
                         </div>
                     `;
                 }).join('');
-            
+
             // 공지 업무 카드
             noticeSummary.innerHTML = upcomingNotices.length === 0
                 ? '<div class="empty-state">이번 주 공지 업무가 없습니다</div>'
@@ -3999,7 +4089,7 @@ v2.8 개발 실록 (최종 검증 완료)
                         </div>
                     `;
                 }).join('');
-            
+
             // 시험지 생성 카드
             paperSummary.innerHTML = upcomingPapers.length === 0
                 ? '<div class="empty-state">이번 주 시험지 생성 업무가 없습니다</div>'
@@ -4014,7 +4104,25 @@ v2.8 개발 실록 (최종 검증 완료)
                         </div>
                     `;
                 }).join('');
-            
+
+            // 미응시자 독려 카드
+            const encourageSummaryEl = document.getElementById('encourageSummary');
+            if (encourageSummaryEl) {
+                encourageSummaryEl.innerHTML = upcomingEncourages.length === 0
+                    ? '<div class="empty-state">이번 주 독려 업무가 없습니다</div>'
+                    : upcomingEncourages.map(event => {
+                        const date = new Date(event.encourageDate);
+                        const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
+                        const completedClass = (event.completedTypes && event.completedTypes.encourage) ? 'completed' : '';
+                        return `
+                            <div class="summary-item ${completedClass}">
+                                <span class="summary-item-name">${event.encourageName || event.name + ' 미응시자 독려'}</span>
+                                <span class="summary-item-date">${dateStr}</span>
+                            </div>
+                        `;
+                    }).join('');
+            }
+
             console.log('✅ 요약 섹션 렌더링 완료');
         }
 
@@ -4275,13 +4383,15 @@ v2.8 개발 실록 (최종 검증 완료)
                     examDate: item.examDate,
                     noticeDate: item.noticeDate,
                     paperDate: item.paperDate,
+                    encourageDate: item.encourageDate || null,
                     noticeName: item.noticeName,
                     paperName: item.paperName,
+                    encourageName: item.encourageName || null,
                     type: item.type,
                     category: item.category,
                     is_completed: false,
-                    completedTypes: { main: false, notice: false, creation: false },
-                    special_notes: {}  // 빈 객체로 초기화
+                    completedTypes: { main: false, notice: false, creation: false, encourage: false },
+                    special_notes: {}
                 });
             });
             
@@ -4346,6 +4456,17 @@ v2.8 개발 실록 (최종 검증 완료)
                         date  : item.paperDate
                     });
                 }
+
+                // 4. D+4 미응시자 독려 행
+                if (item.encourageDate) {
+                    rows.push({
+                        group : group,
+                        tag   : 'encourage',
+                        label : 'D+4 독려',
+                        name  : item.encourageName,
+                        date  : item.encourageDate
+                    });
+                }
             });
 
             // ── 날짜 기준 정렬 ──
@@ -4375,14 +4496,15 @@ v2.8 개발 실록 (최종 검증 완료)
             }).join('');
 
             // ── 카운트 & 안내 텍스트 ──
-            const examCount   = rows.filter(r => r.tag === 'exam').length;
-            const noticeCount = rows.filter(r => r.tag === 'notice').length;
-            const paperCount  = rows.filter(r => r.tag === 'creation').length;
-            const otherCount  = rows.length - examCount - noticeCount - paperCount;
+            const examCount     = rows.filter(r => r.tag === 'exam').length;
+            const noticeCount   = rows.filter(r => r.tag === 'notice').length;
+            const paperCount    = rows.filter(r => r.tag === 'creation').length;
+            const encourageCount = rows.filter(r => r.tag === 'encourage').length;
+            const otherCount    = rows.length - examCount - noticeCount - paperCount - encourageCount;
 
             document.getElementById('modalTotalCount').textContent = `${rows.length}건`;
             document.getElementById('modalFootInfo').textContent =
-                `평가 ${examCount}건 · D-14 공지 ${noticeCount}건 · D-2 생성 ${paperCount}건` +
+                `평가 ${examCount}건 · D-14 공지 ${noticeCount}건 · D-2 생성 ${paperCount}건 · D+4 독려 ${encourageCount}건` +
                 (otherCount > 0 ? ` · 기타 ${otherCount}건` : '');
 
             // ── 모달 표시 ──
@@ -4500,30 +4622,33 @@ v2.8 개발 실록 (최종 검증 완료)
                 // ✅ 평가 일정: 공지/생성 배지 자동 생성
                 const dates = calculateDates(examDate);
                 const autoCategory = categorizeEvent(examName, 'exam');
-                
+                const needsEncourage = ['midterm', 'final'].includes(autoCategory);
+
                 newExam = {
                     id: crypto.randomUUID(),
                     name: examName,
                     examDate: dates.examDate,
                     noticeDate: dates.noticeDate,
                     paperDate: dates.paperDate,
+                    encourageDate: needsEncourage ? dates.encourageDate : null,
                     noticeName: `${examName} 공지`,
                     paperName: `${examName} 시험지`,
+                    encourageName: needsEncourage ? `${examName} 미응시자 독려` : null,
                     type: 'exam',
-                    category: autoCategory,  // 자동 인식 (midterm, final 등)
+                    category: autoCategory,
                     is_completed: false,
-                    completedTypes: { main: false, notice: false, creation: false },
+                    completedTypes: { main: false, notice: false, creation: false, encourage: false },
                     special_notes: {}
                 };
-                
+
                 console.log('✅ 평가 일정 등록:', examName, '→ 카테고리:', autoCategory);
-                
+
                 alertMessage = `✓ 평가 일정이 등록되었습니다!
 
 일정명: ${examName}
 학사일: ${formatDateKorean(dates.examDate)}
 공지일: ${formatDateKorean(dates.noticeDate)}
-시험지 생성일: ${formatDateKorean(dates.paperDate)}`;
+시험지 생성일: ${formatDateKorean(dates.paperDate)}${needsEncourage ? '\n미응시자 독려일: ' + formatDateKorean(dates.encourageDate) : ''}`;
             } else {
                 // ✅ 일반 일정: 해당 날짜에만 배지 생성
                 const autoCategory = categorizeEvent(examName, 'general');
