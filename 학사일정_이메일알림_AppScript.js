@@ -25,6 +25,11 @@ function doPost(e) {
     props.setProperty('eventsData', JSON.stringify(data.events || []));
     props.setProperty('lastSync',   new Date().toISOString());
 
+    // 대시보드 버튼 클릭 시 즉시 이메일 발송
+    if (data.sendNow === true) {
+      sendDailyEmail();
+    }
+
     return ContentService
       .createTextOutput(JSON.stringify({ success: true, count: (data.events || []).length }))
       .setMimeType(ContentService.MimeType.JSON);
@@ -207,10 +212,7 @@ function sendDailyEmail() {
   const today  = getTodayStr();
   const tasks  = calculateTasks(events, today);
 
-  if (tasks.todayTotal === 0 && tasks.overdueTotal === 0) {
-    Logger.log('✅ 오늘 처리할 업무 없음 - 이메일 발송 생략');
-    return;
-  }
+  // 업무 없어도 이메일 발송 (수신자가 확인할 수 있도록)
 
   const subject  = '[학사일정] 📋 오늘의 업무 알림 (' + formatKoreanDate(today) + ')';
   const htmlBody = generateEmailHTML(tasks, today);

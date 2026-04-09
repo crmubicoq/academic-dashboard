@@ -3174,7 +3174,7 @@ v2.8 개발 실록 (최종 검증 완료)
             fetch(url, {
                 method : 'POST',
                 headers: { 'Content-Type': 'text/plain' },
-                body   : JSON.stringify({ events: events }),
+                body   : JSON.stringify({ events: events, sendNow: true }),
                 mode   : 'no-cors'
             })
             .then(() => {
