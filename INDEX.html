@@ -2219,13 +2219,21 @@
                         <p class="card-description">새로운 학사 일정을 등록하세요</p>
                     </div>
 
+                    <!-- 단일/반복 탭 -->
+                    <div class="tab-container" style="margin-bottom: 16px;">
+                        <button class="tab-button active" data-regtype="single">단일 등록</button>
+                        <button class="tab-button" data-regtype="repeat">반복 등록</button>
+                    </div>
+
+                    <!-- 단일 등록 -->
+                    <div id="singleRegTab">
                     <form id="examForm">
                         <div class="form-group">
                             <label class="form-label" for="examName">학사 명칭</label>
-                            <input 
-                                type="text" 
-                                id="examName" 
-                                class="form-input" 
+                            <input
+                                type="text"
+                                id="examName"
+                                class="form-input"
                                 placeholder="예: 중간고사, 기말고사"
                                 required
                             >
@@ -2233,9 +2241,9 @@
 
                         <div class="form-group">
                             <label class="form-label" for="examDate">학사 날짜</label>
-                            <input 
-                                type="date" 
-                                id="examDate" 
+                            <input
+                                type="date"
+                                id="examDate"
                                 class="form-input"
                                 required
                             >
@@ -2243,8 +2251,8 @@
 
                         <div class="form-group">
                             <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     id="isEvaluation"
                                     style="width: 18px; height: 18px; cursor: pointer;"
                                 >
@@ -2258,6 +2266,61 @@
 
                         <button type="submit" class="btn">일정 등록</button>
                     </form>
+                    </div>
+
+                    <!-- 반복 등록 -->
+                    <div id="repeatRegTab" style="display:none;">
+                    <form id="repeatForm">
+                        <div class="form-group">
+                            <label class="form-label" for="repeatName">일정 명칭</label>
+                            <input
+                                type="text"
+                                id="repeatName"
+                                class="form-input"
+                                placeholder="예: SMS 보내기, 주간보고"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">기간</label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="date" id="repeatStart" class="form-input" required style="flex:1;">
+                                <span style="color:#6B7280; font-size: 14px; white-space:nowrap;">~</span>
+                                <input type="date" id="repeatEnd" class="form-input" required style="flex:1;">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">반복 요일</label>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+                                <label style="display:flex; align-items:center; gap:4px; cursor:pointer; padding: 6px 12px; border: 1.5px solid #E5E7EB; border-radius: 20px; font-size:13px; font-weight:500; transition: all 0.15s;" id="dow-label-0">
+                                    <input type="checkbox" name="repeatDow" value="0" style="display:none;"> 일
+                                </label>
+                                <label style="display:flex; align-items:center; gap:4px; cursor:pointer; padding: 6px 12px; border: 1.5px solid #E5E7EB; border-radius: 20px; font-size:13px; font-weight:500; transition: all 0.15s;" id="dow-label-1">
+                                    <input type="checkbox" name="repeatDow" value="1" style="display:none;"> 월
+                                </label>
+                                <label style="display:flex; align-items:center; gap:4px; cursor:pointer; padding: 6px 12px; border: 1.5px solid #E5E7EB; border-radius: 20px; font-size:13px; font-weight:500; transition: all 0.15s;" id="dow-label-2">
+                                    <input type="checkbox" name="repeatDow" value="2" style="display:none;"> 화
+                                </label>
+                                <label style="display:flex; align-items:center; gap:4px; cursor:pointer; padding: 6px 12px; border: 1.5px solid #E5E7EB; border-radius: 20px; font-size:13px; font-weight:500; transition: all 0.15s;" id="dow-label-3">
+                                    <input type="checkbox" name="repeatDow" value="3" style="display:none;"> 수
+                                </label>
+                                <label style="display:flex; align-items:center; gap:4px; cursor:pointer; padding: 6px 12px; border: 1.5px solid #E5E7EB; border-radius: 20px; font-size:13px; font-weight:500; transition: all 0.15s;" id="dow-label-4">
+                                    <input type="checkbox" name="repeatDow" value="4" style="display:none;"> 목
+                                </label>
+                                <label style="display:flex; align-items:center; gap:4px; cursor:pointer; padding: 6px 12px; border: 1.5px solid #E5E7EB; border-radius: 20px; font-size:13px; font-weight:500; transition: all 0.15s;" id="dow-label-5">
+                                    <input type="checkbox" name="repeatDow" value="5" style="display:none;"> 금
+                                </label>
+                                <label style="display:flex; align-items:center; gap:4px; cursor:pointer; padding: 6px 12px; border: 1.5px solid #E5E7EB; border-radius: 20px; font-size:13px; font-weight:500; transition: all 0.15s;" id="dow-label-6">
+                                    <input type="checkbox" name="repeatDow" value="6" style="display:none;"> 토
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn">반복 일정 등록</button>
+                    </form>
+                    </div>
 
                     <!-- 범례 -->
                     <div class="legend">
@@ -4650,6 +4713,121 @@ v2.8 개발 실록 (최종 검증 완료)
         // ============================================
         // 수동 입력 폼
         // ============================================
+        // ============================================
+        // 단일/반복 탭 전환
+        // ============================================
+        document.querySelectorAll('[data-regtype]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('[data-regtype]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const type = this.getAttribute('data-regtype');
+                document.getElementById('singleRegTab').style.display = type === 'single' ? '' : 'none';
+                document.getElementById('repeatRegTab').style.display  = type === 'repeat' ? '' : 'none';
+            });
+        });
+
+        // 요일 체크박스 토글 스타일
+        document.querySelectorAll('[name="repeatDow"]').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const lbl = this.closest('label');
+                if (this.checked) {
+                    lbl.style.background = '#2563EB';
+                    lbl.style.color = '#fff';
+                    lbl.style.borderColor = '#2563EB';
+                } else {
+                    lbl.style.background = '';
+                    lbl.style.color = '';
+                    lbl.style.borderColor = '#E5E7EB';
+                }
+            });
+        });
+
+        // ============================================
+        // 반복 일정 등록
+        // ============================================
+        document.getElementById('repeatForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const name      = document.getElementById('repeatName').value.trim();
+            const startStr  = document.getElementById('repeatStart').value;
+            const endStr    = document.getElementById('repeatEnd').value;
+            const checkedDows = [...document.querySelectorAll('[name="repeatDow"]:checked')].map(c => parseInt(c.value));
+
+            if (!name || !startStr || !endStr) {
+                alert('명칭과 기간을 모두 입력해주세요.');
+                return;
+            }
+            if (checkedDows.length === 0) {
+                alert('반복 요일을 하나 이상 선택해주세요.');
+                return;
+            }
+            if (startStr > endStr) {
+                alert('시작일이 종료일보다 늦습니다.');
+                return;
+            }
+
+            // 기간 내 해당 요일 날짜 수집
+            const dates = [];
+            const cur = new Date(startStr + 'T00:00:00');
+            const end = new Date(endStr   + 'T00:00:00');
+            while (cur <= end) {
+                if (checkedDows.includes(cur.getDay())) {
+                    dates.push(cur.toISOString().slice(0, 10));
+                }
+                cur.setDate(cur.getDate() + 1);
+            }
+
+            if (dates.length === 0) {
+                alert('해당 기간에 선택한 요일이 없습니다.');
+                return;
+            }
+
+            const autoCategory = categorizeEvent(name, 'general');
+            const repeatGroupId = crypto.randomUUID();  // 같은 그룹 식별용
+
+            const newExams = dates.map(date => ({
+                id: crypto.randomUUID(),
+                name: name,
+                examDate: date,
+                noticeDate: null,
+                paperDate: null,
+                encourageDate: null,
+                noticeName: null,
+                paperName: null,
+                encourageName: null,
+                type: 'general',
+                category: autoCategory,
+                is_completed: false,
+                completedTypes: { main: false, notice: false, creation: false, encourage: false },
+                special_notes: {},
+                repeatGroupId: repeatGroupId
+            }));
+
+            try {
+                for (const exam of newExams) {
+                    await saveExamToSupabase(exam);
+                    events.push(exam);
+                }
+                saveToLocalStorage();
+                renderCalendar();
+                renderSummary();
+                this.reset();
+                // 요일 버튼 스타일 초기화
+                document.querySelectorAll('[name="repeatDow"]').forEach(cb => {
+                    const lbl = cb.closest('label');
+                    lbl.style.background = '';
+                    lbl.style.color = '';
+                    lbl.style.borderColor = '#E5E7EB';
+                });
+                const DOW_KR = ['일','월','화','수','목','금','토'];
+                const dowNames = checkedDows.map(d => DOW_KR[d]).join(', ');
+                alert(`✓ 반복 일정이 등록되었습니다!\n\n일정명: ${name}\n기간: ${startStr} ~ ${endStr}\n반복 요일: 매주 ${dowNames}요일\n총 ${dates.length}건 등록`);
+            } catch (error) {
+                alert('일정 등록 중 오류가 발생했습니다.');
+                console.error(error);
+            }
+        });
+
         document.getElementById('examForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
