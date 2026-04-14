@@ -3261,6 +3261,8 @@ v2.8 개발 실록 (최종 검증 완료)
             } catch (e) {
                 console.error('localStorage 저장 오류:', e);
             }
+            // 데이터 변경 시마다 Apps Script 자동 동기화
+            syncToAppsScript();
         }
 
         function loadFromLocalStorage() {
